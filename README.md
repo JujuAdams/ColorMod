@@ -2,23 +2,17 @@
 
 ## Introduction
 
-Something that came up at work this week was the topic of palette swapping. This is a common technique whereby a set of colours in a source image are swapped out for a different colour. This technique has a long history and dates back to hardware where a game's palette was a space in memory that stored colour mapping and changing the palette would change the appearance of sprites drawn to the screen. Palette swapping can be used with high res assets - The Swords Of Ditto used a palette swapper, for example - but it's most commonly associated with pixel art games.
+Something that came up at work this week was the topic of palette swapping. This is a common technique whereby a set of colours in a source image are swapped out for a different colour. It reduces the number of assets that need to be created by allowing things like changing costume colour to be done programmatically. This technique has a long history and dates back to hardware where a game's colour palette was a dedicated space in memory and changing the palette would change the appearance of sprites drawn to the screen. Palette swapping can be used with high res assets - The Swords Of Ditto used a palette swapper, for example - but it's most commonly associated with pixel art games.
 
-You can do palette swapping by splitting an image into many layers and using vertex colours to tint each layer but this results in a lot of overdraw and each vertices flying around to its use is limited. These days, palette swapping is most often accomplished in a fragment (pixel) shader and this is focus of this particular article. Mapping between input and output colours for a palette swapper are assumed to be 1:1 with no tolerance/threshold values i.e. "old school" or "hard" palette swapping. (Soft palette swapping using tolerances/thresholds are useful for dealing with high res images but that's a topic for another time.)
+You can do palette swapping by splitting an image into many layers and then tinting each layer but this results in a lot of overdraw and its use is limited. Palette swapping is most often accomplished in a fragment (pixel) shader and this is the focus of this particular article. Mapping between input and output colours for a palette swapper are assumed to be 1:1 with no tolerance/threshold values i.e. "old school" or "hard" palette swapping. (Soft palette swapping using tolerances/thresholds are useful for dealing with high res images but that's a topic for another time.)
+
+A note on terminology: I'll be using the word "colour" a lot.
 
 ## Colour Searching
 
-The basic requirements for a palette swapping shader are:
+A palette swap takes an input colour sampled from the image itself, finds which target colour that matches, and then spits out a new output colour so that it can be drawn. The output colours are dynamic and can be changed at runtime. The target colours are invariably known at compile time as they need to match the source image. Because output colours can change at runtime, they are stored in an array (or a lookup texture - more on that later). This means input colours are first translated into an array index via the target colours and then the output colour is determined by whatever value is stored in that array. 
 
-1. Have a "list" of input colours and associated output colours;
-
-2. Be able to find an input colour in that list;
-
-3. Identify the correct output colour based on which input colour has been found.
-
-The first and third requirements are typically met with the use of either a uniform array of colours, or with a look-up texture (also called an "LUT", a similar idea to colour grading LUTs).
-
-The second requirement is the central issue in a palette swapping shader. There are well over 16 million possible combinations of values for a 24-bit RGB colour. It is inadviseable to create a 16 million entry array that handles every single value, and this sort of thing isn't possible in a shader anyway. After all, the palette for a sprite is rarely more than a couple dozen colours. It's sort of possible to make an LUT for 16 million colours as that'd be a 4096x4096 LUT but we can do a lot better than wasting all that space.
+There are well over 16 million possible combinations of values for a 24-bit RGB colour. It is inadviseable to create a 16 million entry array that handles every single value, and this sort of thing isn't possible in a shader anyway. After all, the palette for a sprite is rarely more than a couple dozen colours. It's sort of possible to make an LUT for 16 million colours as that'd be a 4096x4096 LUT but we can do a lot better than wasting all that space.
 
 The most basic solution to this problem is to send an array (or LUT) into the shader that contains only exactly the input and output colours that are relevant. We can then iterate over that array in a fragment shader trying to find a matching input colour. This isn't the worst idea but it's slow and scales poorly due to O(n) complexity. Furthermore, if you use an array to contain input colours then you'll hit a limit on how many uniform registers you can use which puts a hard limit on the number of colours you can swap. To make matters worse, where that limit is depends massively on the hardware you're testing on! If you opt for an LUT instead of an array then it's even slower due to the expense of texture sampling.
 
