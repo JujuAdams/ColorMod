@@ -43,5 +43,3 @@ After doing this work, getting an output colour is as simple as `outputColour = 
 Actually finding the right modulo base is a process of brute force, or at least I haven't found a good way of finding the best base without a greedy search. As a result, this isn't a quick process and can take a while. The good news is that it only needs to happen once and any results can be cached for use later. Potentially these results can even be pre-computed before compiling the game.
 
 Something to point out here is that the array indexes will be unorder and non-consecutive. There is typically some space between entries in the array. This isn't ideal but it's a lot better than the situation we started with: millions of empty spaces. Part of the trade-off of using the modulo solution is not having 100% memory efficiency.
-
-## Look-up Textures
