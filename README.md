@@ -1,8 +1,14 @@
-# Modulo Palette Swapper
+# The "Colour Modulo" Palette Swapper
 
-**A hardware accelerated method for O(1) palette lookups that avoids pre-processing source images.**
+**A method for O(1) palette lookups that avoids pre-processing source images.**
 
 Juju Adams 2024
+
+&nbsp;
+
+## tl;dr
+
+This repo contains a library that does fast palette swapping for an arbitrary number of colours in constant time without modifying the source image. This system will need a short period of time to initialize on boot (depends on the number of colours in the palette but usually on the order of a tenth of a second). This solution hits the sweet spot between the flexibility of colour searching and the speed of colour indexing. Colour modulo palette swapping is less performant than colour indexing due to the additional texture sample per texel but the colour modulo solution is much more convenient to use in production.
 
 &nbsp;
 
@@ -22,7 +28,7 @@ A palette swap takes an input colour sampled from the image itself, finds which 
 
 There are well over 16 million possible combinations of values for a 24-bit RGB colour. It is inadviseable to create a 16 million entry array that handles every possible RGB colour value, and throwing an around of this size isn't possible in a shader anyway. After all, the palette for a sprite is rarely more than a couple dozen colours, if that. Allocating space for every possible outcome is inefficient. Instead, palette swappers must find a way to reduce the amount of space that's needed to match input colours to target colours.
 
-The most basic solution to this problem is to send an array into the shader that contains only exactly the target colours that are relevant. We can then iterate over that array in a fragment shader trying to find a match between our input colour and target colour. Once we know which target colour we're looking at then we get an array index, and that array index can be converted into an output colour. This isn't the worst idea but it's slow and scales poorly due to O(n) complexity. Colour searching is very flexible but the trade-off is that the GPU is doing a lot more work to accommodate that flexibility.
+The most basic solution to this problem is to send an array into the shader that contains only exactly the target colours that are relevant. We can then iterate over that array in a fragment shader trying to find a match between our input colour and target colour. Once we know which target colour we're looking at then we get an array index, and that array index can be converted into an output colour. This isn't the worst idea but it's slow and scales poorly due to `O(n)` complexity. Colour searching is very flexible but the trade-off is that the GPU is doing a lot more work to accommodate that flexibility.
 
 &nbsp;
 
@@ -32,7 +38,9 @@ Instead of iterating over an array of colours, smart developers can instead use 
 
 For example, if you wanted to swap red to blue then you'd process your image to replace every red pixel with a greyscale value. Let's say red is the fourth target colour we have to its colour becomes #030303 (since we're zero-indexed). When drawing this image, you'd use a shader that takes greyscale images and turns it into an index value for an array. #030303 would become `3`. This index is then used to read an output colour from an array sent into the shader. This is really fast and a conceptually elegant technique. We can think of making the pre-processing step as "pre-searching" for an array index and then storing that result for fast access later.
 
-The problem with colour indexing is that it requires pre-processing all your images that need colour swapping. It's not a trivial task to write tooling to do that. You also need to ensure that colour indexes match the correct position in the output volout array across all images which is a lot of work to manage and regularly breaks. Finally, if your art assets change (which is often) then you'll need to process your art all over again. And if you've processed all your art then you really should test all your art in-gsme to make sure nothing id broken. The colour index method is very fast it creates a lot of fiddly work that is liable to break, time-consuming to test, and very obvious to players when it's broken.
+Because the input colour is the array index, the time complexity for finding the correct output colour is `O(1)`. It doesn't matter how many target colours we have, the performance of this method will stay about the same.
+
+The problem with colour indexing is that it requires pre-processing all your images that need colour swapping. It's not a trivial task to write tooling to do that. You also need to ensure that colour indexes match the correct position in the output volout array across all images which is a lot of work to manage and regularly breaks. Finally, if your art assets change (which is often) then you'll need to process your art all over again. And if you've processed all your art then you really should test all your art in-game to make sure nothing id broken. The colour index method is very fast it creates a lot of fiddly work that is liable to break, time-consuming to test, and very obvious to players when it's broken.
 
 &nbsp;
 
@@ -40,18 +48,20 @@ The problem with colour indexing is that it requires pre-processing all your ima
 
 What we want is the speed of colour indexing with the convenience of colour searching. Whilst it's not possible to be quite as memory efficient as either of the two techniques discussed, we can use some simple maths to get both speed and convenience without too much compromise.
 
-Palette swapping is all about taking an input colour finding a matching target colour in an array. The "colour search" solution discovers our array index by iterating over all the target colours and checking for a match one by one. The "colour index" solution treats the input colour itself as an array index after a little pre-processing. For our new solution is calculate the array index for a given input colour at runtime by using the modulo mathematical function. (I won't explain what modulo does in detail here because if you're implementing a palette swap shader you probably know already. If you don't, [Khan Academy](https://www.khanacademy.org/computing/computer-science/cryptography/modarithmetic/a/what-is-modular-arithmetic) has a decent article.)
+Palette swapping is all about taking an input colour finding a matching target colour in an array. The "colour search" solution discovers our array index by iterating over all the target colours and checking for a match one by one. The "colour index" solution treats the input colour itself as an array index, albeit after pre-processing the image before compile. The solution being introduced here will calculate the array index for a given input colour at runtime by using the modulo mathematical function. (I won't explain what modulo does in detail here because if you're implementing a palette swap shader you probably know already. If you don't, [Khan Academy](https://www.khanacademy.org/computing/computer-science/cryptography/modarithmetic/a/what-is-modular-arithmetic) has a decent article.)
 
 What're going to do is calculate the array index as simply `arrayIndex = inputColour mod base`. Because we're using modulo, we know that calculated array indexes can never exceed the base of the modulo function. This puts a hard limit on the maximum length of the array. We further choose an appropriate base such that none of the calculated array indexes overlap for the input colours in the image. We want to choose the base that gives us the smallest modulo base possible which means our final array can be as small as possible. We're going to assume all input colours are remappable for the purposes of choosing a base otherwise we might end up in a situation where we have an array index collision leading to the wrong colours being swapped.
 
-Getting an output colour is as simple as `outputColour = array[inputColour mod base]`. This is fast for the GPU to calculate in a fragment shader and doesn't require any semi-permanent image processing work. We can do some additional work to improve on this equation to reduce the array size a little bit but let's keep it simple for now.
+Getting an output colour is as simple as `outputColour = array[inputColour mod base]`. This is fast for the GPU to calculate in a fragment shader and doesn't require any image pre-processing. We can do some additional work to improve on this equation to reduce the array size a little bit, but let's keep it simple for now.
 
 Actually finding the right modulo base is a process of brute force, or at least I haven't found a good way of finding the best base without an exaustive search. As a result, this isn't a quick process and can take a while. The good news is that it only needs to happen once and any results can be cached for use later. Potentially these results can even be pre-computed before compiling the game.
 
-Something to point out here is that the array indexes generated by this method will be unorder and non-consecutive. Part of the trade-off of using the modulo solution is not having 100% memory efficiency and there is typically some space between entries in the array. This isn't ideal but it's better than storing data for 16 million colours!
+Something to point out here is that the array indexes generated by this method will be unordered and non-consecutive. Part of the trade-off of using the modulo solution is not having 100% memory efficiency and there is typically some space between entries in the array. This isn't ideal but it's better than storing data for 16 million colours!
 
 &nbsp;
 
-## Look-up Textures
+## Appendix: Look-up Textures
 
-If you use an array to contain target colours then you'll hit a limit on how many uniform registers you can use which puts a hard limit on the number of colours you can swap. To make matters worse, where that limit is depends massively on the hardware you're testing on! If you opt for an LUT instead of an array then it's even slower due to the expense of texture sampling.
+I've been using the word "array" a lot but this solution will regularly require an array that is far larger than a shader can support. If you use an array to contain output colours then, due to the amount of empty space that is typical in the output colour array, you'll hit a limit on how many uniform registers you can use. To make matters worse, where that limit is depends massively on the hardware you're testing on! In reality, an array is unlikely to be suitable to contain the output colours. Instead, we can use a "look-up texture" instead of an array, also called a "LUT". Look-up textures are slower to access than an array but without them this solution wouldn't be viable.
+
+In GameMaker, we could either use a sprite to contain this look-up texture or - more practically - we can use a surface. We make the look-up texture available to the palette swap shader by binding it as a sampler. For the implementation in this repo, each row of the surface is an entry in an array where the index of the array is the y-axis in the surface. Multiple palette can be stored on the surface by using different columns, effectively making the surface a 2D array.
