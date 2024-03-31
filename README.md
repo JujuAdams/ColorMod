@@ -1,5 +1,11 @@
 # Modulo Palette Swapper
 
+**A hardware accelerated method for O(1) palette lookups that avoids pre-processing source images.**
+
+Juju Adams 2024
+
+&nbsp;
+
 ## Introduction
 
 Something that came up at work this week was the topic of palette swapping. This is a common technique whereby a set of colours in a source image are swapped out for a different colour. It reduces the number of assets that need to be created by allowing things like changing costume colour to be done programmatically. This technique has a long history and dates back to hardware where a game's colour palette was a dedicated space in memory and changing the palette would change the appearance of sprites drawn to the screen. Palette swapping can be used with high res assets - The Swords Of Ditto used a palette swapper, for example - but it's most commonly associated with pixel art games.
