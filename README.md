@@ -8,6 +8,8 @@ You can do palette swapping by splitting an image into many layers and then tint
 
 A note on terminology: I'll be using the word "colour" a lot. It's going to get a bit repetitive but there's no way around that. There are three types of colour that a palette swapper concerns itself with. Firstly, there are the "input" colours. These are colours found by sampling the image that's being drawn. Secondly, there are "target" colours which are the colours we're looking to replace. Not all colours in an image are going to be target colours, a classic example is the whites of a character's eyes. Finally, we have "output" colours. There are the colours that we are using as the replacements. Output colours are typically grouped together in palettes that an artist predefines, though some games allow a playet to define their own colours. In short, input colours that match target colours get turned into the equivalent output colours.
 
+&nbsp;
+
 ## Colour Searching
 
 A palette swap takes an input colour sampled from the image itself, finds which target colour that matches, and then spits out a new output colour so that it can be drawn. The output colours are dynamic and can be changed at runtime. The target colours are invariably known at compile time as they need to match the source image. Because output colours can change at runtime, they are stored in an array (or a lookup texture - more on that later) such that output colours can we swapped over at runtime fluidly. This means input colours are first translated into an array index via the target colours and then the output colour is determined by whatever value is stored in that array. 
@@ -16,6 +18,8 @@ There are well over 16 million possible combinations of values for a 24-bit RGB 
 
 The most basic solution to this problem is to send an array into the shader that contains only exactly the target colours that are relevant. We can then iterate over that array in a fragment shader trying to find a match between our input colour and target colour. Once we know which target colour we're looking at then we get an array index, and that array index can be converted into an output colour. This isn't the worst idea but it's slow and scales poorly due to O(n) complexity. Colour searching is very flexible but the trade-off is that the GPU is doing a lot more work to accommodate that flexibility.
 
+&nbsp;
+
 ## Colour Indexing
 
 Instead of iterating over an array of colours, smart developers can instead use "colour indexing". This method requires replacing input colours in the image itself before compiling the game. Instead of seeing a colour in an image as an actual colour, the "colour index" skips a search step entirely and encodes the array index as the colour value itself. Colours in the image that are targets are replaced with (typically) a greyscale value. Each greyscale value is actually an array index value that line up with an output colour array.
@@ -23,6 +27,8 @@ Instead of iterating over an array of colours, smart developers can instead use 
 For example, if you wanted to swap red to blue then you'd process your image to replace every red pixel with a greyscale value. Let's say red is the fourth target colour we have to its colour becomes #030303 (since we're zero-indexed). When drawing this image, you'd use a shader that takes greyscale images and turns it into an index value for an array. #030303 would become `3`. This index is then used to read an output colour from an array sent into the shader. This is really fast and a conceptually elegant technique. We can think of making the pre-processing step as "pre-searching" for an array index and then storing that result for fast access later.
 
 The problem with colour indexing is that it requires pre-processing all your images that need colour swapping. It's not a trivial task to write tooling to do that. You also need to ensure that colour indexes match the correct position in the output volout array across all images which is a lot of work to manage and regularly breaks. Finally, if your art assets change (which is often) then you'll need to process your art all over again. And if you've processed all your art then you really should test all your art in-gsme to make sure nothing id broken. The colour index method is very fast it creates a lot of fiddly work that is liable to break, time-consuming to test, and very obvious to players when it's broken.
+
+&nbsp;
 
 ## Modulo
 
@@ -37,6 +43,8 @@ Getting an output colour is as simple as `outputColour = array[inputColour mod b
 Actually finding the right modulo base is a process of brute force, or at least I haven't found a good way of finding the best base without an exaustive search. As a result, this isn't a quick process and can take a while. The good news is that it only needs to happen once and any results can be cached for use later. Potentially these results can even be pre-computed before compiling the game.
 
 Something to point out here is that the array indexes generated by this method will be unorder and non-consecutive. Part of the trade-off of using the modulo solution is not having 100% memory efficiency and there is typically some space between entries in the array. This isn't ideal but it's better than storing data for 16 million colours!
+
+&nbsp;
 
 ## Look-up Textures
 
