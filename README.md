@@ -44,7 +44,7 @@ The problem with colour indexing is that it requires pre-processing all your ima
 
 &nbsp;
 
-## Modulo
+## Colour Modulo
 
 What we want is the speed of colour indexing with the convenience of colour searching. Whilst it's not possible to be quite as memory efficient as either of the two techniques discussed, we can use some simple maths to get both speed and convenience without too much compromise.
 
