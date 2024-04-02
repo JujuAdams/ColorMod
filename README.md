@@ -1,6 +1,6 @@
 # The "Colour Modulo" Palette Swapper
 
-**A method for O(1) palette lookups that avoids pre-processing source images.**
+**A method for O(1) palette lookups without image pre-processing.**
 
 Juju Adams 2024
 
@@ -8,7 +8,7 @@ Juju Adams 2024
 
 ## tl;dr
 
-This repo contains a library that does fast palette swapping for an arbitrary number of colours in constant time without modifying the source image. This system will need a short period of time to initialize on boot (depends on the number of colours in the palette but usually around a millisecond). This solution hits the sweet spot between the flexibility of colour searching and the speed of colour indexing. Colour modulo palette swapping is slightly less performant than colour indexing due to the additional maths being run in the fragment shader but thi new colour modulo solution is much more convenient to use in production.
+This repo contains a library that does fast palette swapping for an arbitrary number of colours in constant time without modifying the source image. This system will need a short period of time to initialize when setting up (time taken depends on the number of colours in the palette but around a millisecond for 20 colours in my limited testing). This solution hits the sweet spot between the flexibility of colour searching and the speed of colour indexing. Colour modulo palette swapping is slightly less performant than colour indexing due to the additional maths being run in the fragment shader but the colour modulo solution is much more convenient to use in production.
 
 &nbsp;
 
@@ -78,7 +78,7 @@ Here's the naive implementation where we use floats instead of integers:
 
 ```
 vec4 inputSample = texture2D(gm_BaseTexture, v_vTexcoord);
-float colourInteger = floor(255.0*inputSample.r) + floor(256.0*255.0*inputSample.g) + floor(256.*256.0*255.0*inputSample.b);
+float colourInteger = (255.0*inputSample.r) + (256.0*255.0*inputSample.g) + (256.*256.0*255.0*inputSample.b);
 float moduloValue = mod(colourInteger, u_fModulo);
 ```
 
