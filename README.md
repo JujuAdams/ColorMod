@@ -113,7 +113,7 @@ There're two new tokens introduced here: `modV()` and `moduloVector`. `modV()` i
 
 &nbsp;
 
-##Putting It All Together
+## Putting It All Together
 
 Once a suitable modulo has been found, we've written some code to read colours out from a look-up texture, and the precision issues have been sorted out we're pretty much done. The only thing left to do is write a nice API around this thing and sling it into a project. I won't go into much detail here about what a decent API would look like because I've written a reference implementation with such an API already. Something to note is that I've found adding a nice debug mode to the palette swapper to be beneficial to quickly identify missing or undefined colours. I recommend doing the same.
 
