@@ -78,7 +78,7 @@ Here's the naive implementation where we use floats instead of integers:
 
 ```
 vec4 inputSample = texture2D(gm_BaseTexture, v_vTexcoord);
-float colourInteger = floor(255.0*inputSample.r) + floor(256.0*255.0*inputSample.g) + floor(256.*256.0*255.0*inputSample.b);
+float colourInteger = (255.0*inputSample.r) + (256.0*255.0*inputSample.g) + (256.*256.0*255.0*inputSample.b);
 float moduloValue = mod(colourInteger, u_fModulo);
 ```
 
