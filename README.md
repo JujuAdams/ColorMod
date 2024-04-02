@@ -1,6 +1,6 @@
 # The "Colour Modulo" Palette Swapper
 
-**A method for O(1) palette lookups that avoids pre-processing source images.**
+**A method for O(1) palette lookups without image pre-processing.**
 
 Juju Adams 2024
 
