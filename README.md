@@ -8,7 +8,7 @@ Juju Adams 2024
 
 ## tl;dr
 
-This repo contains a library that does fast palette swapping for an arbitrary number of colours in constant time without modifying the source image. This system will need a short period of time to initialize on boot (depends on the number of colours in the palette but usually on the order of tens of milliseconds). This solution hits the sweet spot between the flexibility of colour searching and the speed of colour indexing. Colour modulo palette swapping is less performant than colour indexing due to the additional texture sample per texel but the colour modulo solution is much more convenient to use in production.
+This repo contains a library that does fast palette swapping for an arbitrary number of colours in constant time without modifying the source image. This system will need a short period of time to initialize on boot (depends on the number of colours in the palette but usually on the order of tens of milliseconds). This solution hits the sweet spot between the flexibility of colour searching and the speed of colour indexing. Colour modulo palette swapping is slightly less performant than colour indexing due to the additional maths being run in the fragment shader but the colour modulo solution is much more convenient to use in production.
 
 &nbsp;
 
@@ -70,6 +70,53 @@ In GameMaker, we could either use a sprite to contain this look-up texture or - 
 
 ## GLSL ES 1.00 Makes Life Hard
 
-Whilst the colour modulo technique is sound in principle, unfortunately GameMaker's humiliatingly old version of GLSL ES prevents us from using integer modulo in a shader. This means that we have to rely on floating point numbers to be precise when working with integers. Mobile GPUs especially have problems with this and the naive implementation of colour modulo is unlikely to work reliably in production. Fortunately there are some fun modular arithmetic tricks we can do to work around loss of precision.
+*If you're not using GameMaker (And you still found this repo! Hi there) then you can skip this bit and use a straight-forward implementation. You'll be fine.*
 
+Whilst the colour modulo technique is sound in principle, unfortunately GameMaker's humiliatingly old version of GLSL ES prevents us from using integer modulo in a shader. This means that we have to rely on floating point numbers to be precise when working with integers. Floating point numbers are well known to have devious accuracy and precision issues. Older mobile GPUs especially have problems with this - even when forcing high precision such that we're stuffing a 24-bit integer into a 32-bit float you'll still often run into problems. The naive implementation of colour modulo is tnus unlikely to work reliably in the wild. Fortunately there are some fun modular arithmetic tricks we can do to work around loss of precision.
 
+Here's the naive implementation where we use floats instead of integers:
+
+```
+vec4 inputSample = texture2D(gm_BaseTexture, v_vTexcoord);
+float colourInteger = floor(255.0*inputSample.r) + floor(256.0*255.0*inputSample.g) + floor(256.*256.0*255.0*inputSample.b);
+float moduloValue = mod(colourInteger, u_fModulo);
+```
+
+Rewriting this to work around precision issues isn't immediately obvious but if we apply the following identities then we can start to get somewhere:
+
+```
+Addition:
+(X + Y) mod A = ((X mod A) + (Y mod A)) mod A
+
+Addition (3)
+(X + Y + Z) mod A = ((X mod A) + (Y mod A) + (Z mod A)) mod A
+
+Multiplication:
+(X * Y) mod A = ((X mod A) * (Y mod A)) mod A
+
+Final Equation:
+(255*Red + 256*255*Green + 256*256*255*Blue) mod A = (I*(Red mod A) + J*(Green mod A) + K*(Blue mod A)) mod A
+where I = (255 mod A)
+where j = (256*255 mod A)
+where K = (256*256*255 mod A)
+```
+
+Now we've broken down the problem into a set of small modulo operations that are operating over a smaller range of values then we're far more likely to be working within the precision limits that lower-than-high precision floats afford us. Here's what the actual GLSL code looks like in practice:
+
+```
+vec4 inputSample = texture2D(gm_BaseTexture, v_vTexcoord);
+vec3 moduloVector = u_vModulo.rgb*modV(255.0*inputSample.rgb, u_vModulo.a);
+float moduloValue = mod(moduloVector.r + moduloVector.g + moduloVector.b, u_vModulo.a);
+```
+
+There're two new tokens introduced here: `modV()` and `moduloVector`. `modV()` is just a function that applies a modulo per component of a vector which some extra rounding to cope with near-integer floating point numbers. `u_vModulo` is a bit spicier. Its `a` component is the colour modulo as described in previous sections of this article. The `rgb` components are the `IJK` terms calculated above. By describing these three terms as a 3-component vector we can make this shader a little more efficient which is always helpful. We calculate `u_vModulo` outside the shader for convenience as well as to avoid any further precision problems. Note that the factor of `255.0` has been moved around - this seems to lead to better stability in edge cases from my limited testing. Your mileage may vary.
+
+&nbsp;
+
+##Putting It All Together
+
+Once a suitable modulo has been found, we've written some code to read colours out from a look-up texture, and the precision issues have been sorted out we're pretty much done. The only thing left to do is write a nice API around this thing and sling it into a project. I won't go into much detail here about what a decent API would look like because I've written a reference implementation with such an API already. Something to note is that I've found adding a nice debug mode to the palette swapper to be beneficial to quickly identify missing or undefined colours. I recommend doing the same.
+
+Further work in this area may be related to using a larger look-up texture, perhaps a similar size to a colour grading LUT, to cope with palette swapping for non-pixel art graphics.
+
+At any rate, colour modulo has been useful in my workplace to alleviate the workload on artists whilst still achieving the same open-ended goals with good performance. Use it well.
