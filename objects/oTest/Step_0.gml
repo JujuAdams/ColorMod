@@ -1,11 +1,4 @@
-if (mouse_check_button_pressed(mb_left))
-{
-    if (mouse_y < room_height/2)
-    {
-        testIndex = (testIndex - 1 + colorMod.GetModulo()) mod colorMod.GetModulo();
-    }
-    else
-    {
-        testIndex = (testIndex + 1) mod colorMod.GetModulo();
-    }
-}
+if (keyboard_check_pressed(ord("1"))) palette = "test 1";
+if (keyboard_check_pressed(ord("2"))) palette = "test 2";
+if (keyboard_check_pressed(ord("3"))) palette = "test 3";
+if (keyboard_check_pressed(ord("0"))) palette = "default";
