@@ -25,11 +25,10 @@
 /// .SetShader(paletteName)
 ///     Sets up the palette swap shader for the given palette.
 /// 
-/// .PaletteAdd(paletteName, [colorArray])
-///     Adds a new palette to the ColorMod struct. If no color array is provided, the output colors
-///     are copied from the target colors used to create the ColorMod struct. If a palette with the
-///     given name already exists, this function will throw an error. The input color array must be
-///     the same length as the target color array used to create the ColoeMod struct.
+/// .PaletteAdd(paletteName, colorArray)
+///     Adds a new palette to the ColorMod struct. If the color array is too short, colors will be
+///     copied from the target colors used to create to fill in the gap. If a palette with the
+///     given name already exists, this function will throw an error.
 /// 
 /// .PaletteOverwrite(paletteName, colorArray, destOffset, [srcOffset], [length])
 ///     Overwrites a portion of an existing palette using part of a source color array. If a
@@ -151,16 +150,15 @@ function ColorMod(_targetColorArray, _maxPalettes = 30, _debugMode = false) cons
     
     
     
-    static PaletteAdd = function(_paletteName, _outputColorArray = undefined)
+    static PaletteAdd = function(_paletteName, _outputColorArray)
     {
-        if (_outputColorArray == undefined)
-        {
-            _outputColorArray = __ArrayClone(__targetColorArray);
-        }
+        //Duplicate the incoming array to avoid being able to edit the color array after adding it
+        _outputColorArray = __ArrayClone(_outputColorArray);
+        var _outputColorCount = array_length(_outputColorArray);
         
-        if (array_length(_outputColorArray) != __colorCount)
+        if (_outputColorCount > __colorCount)
         {
-            __Error("Color array length (", array_length(_outputColorArray), ") doesn't match target color count ", __colorCount);
+            __Error("Color array length (", _outputColorCount, ") is too long, expecting ", __colorCount);
             return self;
         }
         
@@ -175,6 +173,12 @@ function ColorMod(_targetColorArray, _maxPalettes = 30, _debugMode = false) cons
         {
             __Error("Cannot add palette \"", _paletteName, "\", run out of palette slots (max=", __maxPalettes, ")");
             return self;
+        }
+        
+        var _lengthDelta = __colorCount - array_length(_outputColorArray);
+        if (_lengthDelta > 0)
+        {
+            array_copy(_outputColorArray, _outputColorCount, __targetColorArray, __colorCount - _lengthDelta, _lengthDelta);
         }
         
         var _data = {
