@@ -31,7 +31,7 @@ void main()
     vec4 testSample = texture2D(u_sPalette, u_vTexel*vec2(0.5, moduloValue + 0.5));
     if (all(equal(testSample.rgb, inputSample.rgb)))
     {
-        vec4 outputSample = texture2D(u_sPalette, u_vTexel*vec2(u_fColumn, moduloValue + 0.5));
+        vec4 outputSample = texture2D(u_sPalette, u_vTexel*vec2(u_fColumn + 0.5, moduloValue + 0.5));
         gl_FragColor.rgb = v_vColour.rgb * mix(inputSample.rgb, outputSample.rgb, outputSample.a);
         gl_FragColor.a   = v_vColour.a * inputSample.a;
     }
