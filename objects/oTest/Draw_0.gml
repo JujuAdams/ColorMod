@@ -44,7 +44,7 @@ draw_text(_x + 10, 20, _string);
 
 //Info text
 var _string = "";
-_string += "This is the actual surface used for colour data --->\n";
+_string += "This is the actual surface used for color data --->\n";
 _string += "Each column is a palette\n";
 _string += "Each row is a replacement colour\n";
 
