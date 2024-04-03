@@ -80,7 +80,7 @@
 /// @param [maxPalettes=30]
 /// @param [debugMode=false]
 
-show_debug_message("ColorMod: Welcome to ColorMod by Juju Adams! This is version 1.0.0, 2024-04-02");
+show_debug_message("ColorMod: Welcome to ColorMod by Juju Adams! This is version 1.1.0, 2024-04-03");
 
 function ColorMod(_targetColorArray, _maxPalettes = 30, _debugMode = false) constructor
 {
