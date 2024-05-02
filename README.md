@@ -10,6 +10,8 @@ Juju Adams 2024
 
 This repo contains a library that does fast palette swapping for an arbitrary number of colours in constant time (`O(1)`) without modifying the source image like colour indexing does. This system will need a short period of time to initialize when setting up (time taken depends on the number of colours in the palette but around a millisecond for 20 colours in my limited testing). This solution hits the sweet spot between the flexibility of colour searching and the speed of colour indexing. Colour modulo palette swapping is slightly less performant than colour indexing due to the additional maths being run in the fragment shader but the colour modulo solution is much more convenient to use in production.
 
+Note that the implementation in this repo doesn't include alpha testing so isn't suitable for use in 3D games off the bat. Drop an alpha test and `discard` at the bottom of the `main()` function and you're good to go.
+
 &nbsp;
 
 ## Introduction
