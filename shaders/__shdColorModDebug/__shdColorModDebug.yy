@@ -1,10 +1,12 @@
 {
-  "resourceType": "GMShader",
-  "resourceVersion": "1.0",
-  "name": "__shdColorModDebug",
-  "type": 1,
-  "parent": {
-    "name": "ColorMod",
-    "path": "folders/ColorMod.yy",
+  "$GMShader":"",
+  "%Name":"__shdColorModDebug",
+  "name":"__shdColorModDebug",
+  "parent":{
+    "name":"ColorMod",
+    "path":"folders/ColorMod.yy",
   },
+  "resourceType":"GMShader",
+  "resourceVersion":"2.0",
+  "type":1,
 }

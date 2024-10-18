@@ -1,0 +1,14 @@
+{
+  "FolderOrderSettings":[],
+  "ResourceOrderSettings":[
+    {"name":"oTest","order":1,"path":"objects/oTest/oTest.yy",},
+    {"name":"rMain","order":2,"path":"rooms/rMain/rMain.yy",},
+    {"name":"ColorModDestroy","order":1,"path":"scripts/ColorModDestroy/ColorModDestroy.yy",},
+    {"name":"__shdColorMod","order":2,"path":"shaders/__shdColorMod/__shdColorMod.yy",},
+    {"name":"__shdColorModDebug","order":3,"path":"shaders/__shdColorModDebug/__shdColorModDebug.yy",},
+    {"name":"__shdColorModDebugOutput","order":4,"path":"shaders/__shdColorModDebugOutput/__shdColorModDebugOutput.yy",},
+    {"name":"__sColorModPixel","order":5,"path":"sprites/__sColorModPixel/__sColorModPixel.yy",},
+    {"name":"sTestBase","order":3,"path":"sprites/sTestBase/sTestBase.yy",},
+    {"name":"sTestHair","order":4,"path":"sprites/sTestHair/sTestHair.yy",},
+  ],
+}
