@@ -16,7 +16,7 @@
   "isEcma":false,
   "LibraryEmitters":[],
   "MetaData":{
-    "IDEVersion":"2022.0.2.51",
+    "IDEVersion":"2024.8.1.171",
   },
   "name":"ColorMod",
   "resources":[
@@ -24,12 +24,14 @@
     {"id":{"name":"rMain","path":"rooms/rMain/rMain.yy",},},
     {"id":{"name":"ColorMod","path":"scripts/ColorMod/ColorMod.yy",},},
     {"id":{"name":"ColorModDestroy","path":"scripts/ColorModDestroy/ColorModDestroy.yy",},},
+    {"id":{"name":"ColorModSpriteRowToArray","path":"scripts/ColorModSpriteRowToArray/ColorModSpriteRowToArray.yy",},},
     {"id":{"name":"__shdColorMod","path":"shaders/__shdColorMod/__shdColorMod.yy",},},
     {"id":{"name":"__shdColorModDebug","path":"shaders/__shdColorModDebug/__shdColorModDebug.yy",},},
     {"id":{"name":"__shdColorModDebugOutput","path":"shaders/__shdColorModDebugOutput/__shdColorModDebugOutput.yy",},},
     {"id":{"name":"__sColorModPixel","path":"sprites/__sColorModPixel/__sColorModPixel.yy",},},
     {"id":{"name":"sTestBase","path":"sprites/sTestBase/sTestBase.yy",},},
     {"id":{"name":"sTestHair","path":"sprites/sTestHair/sTestHair.yy",},},
+    {"id":{"name":"sTestPaletteRows","path":"sprites/sTestPaletteRows/sTestPaletteRows.yy",},},
   ],
   "resourceType":"GMProject",
   "resourceVersion":"2.0",
