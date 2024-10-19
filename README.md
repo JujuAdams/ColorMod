@@ -22,13 +22,13 @@ You can do palette swapping by splitting an image into many layers and then tint
 
 A note on terminology: I'll be using the word "colour" a lot. It's going to get a bit repetitive but there's no way around that. There are three types of colour that a palette swapper concerns itself with. Firstly, there are the "input" colours. These are colours found by sampling the image that's being drawn. Secondly, there are "target" colours which are the colours we're looking to replace. Not all colours in an image are going to be target colours, a classic example is the whites of a character's eyes. Finally, we have "output" colours. There are the colours that we are using as the replacements. Output colours are typically grouped together in palettes that an artist predefines, though some games allow a player to define their own colours. In short, input colours that match target colours get turned into the equivalent output colours.
 
-|Name                   |Performance         |VRAM Usage|Time Complexity|Maximum Colours          |Requires preprocessing|
-|-----------------------|--------------------|----------|---------------|-------------------------|----------------------|
-|Colour Indexing        |Very fast           |Very low  |Constant       |Unlimited                |Yes                   |
-|ColorMod               |Fast                |Low       |Constant       |Unknown, > 30            |No                    |
-|Colour search (array)  |Variable, usually OK|Zero      |Linear         |Depends on GPU, around 10|No                    |
-|Colour search (texture)|Very slow           |Very low  |Linear         |Unlimited                |No                    |
-|Look-up Table (LUT)    |Very fast           |Very high |Constant       |Unlimited                |No                    |
+|Name                   |Performance           |VRAM Usage|Time Complexity|Maximum Colours          |Requires preprocessing|
+|-----------------------|----------------------|----------|---------------|-------------------------|----------------------|
+|Colour Indexing        |Very fast             |Very low  |Constant       |Unlimited                |Yes                   |
+|ColorMod               |Fast                  |Low       |Constant       |Unknown, > 30            |No                    |
+|Colour search (array)  |Variable, usually OK  |Zero      |Linear         |Depends on GPU, around 10|No                    |
+|Colour search (texture)|Variable, usually slow|Very low  |Linear         |Unlimited                |No                    |
+|Look-up Table (LUT)    |Very fast             |Very high |Constant       |Unlimited                |No                    |
 
 &nbsp;
 
