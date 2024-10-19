@@ -25,8 +25,8 @@
   "nineSlice":null,
   "origin":0,
   "parent":{
-    "name":"ColorMod",
-    "path":"folders/ColorMod.yy",
+    "name":"(System)",
+    "path":"folders/ColorMod/(System).yy",
   },
   "preMultiplyAlpha":false,
   "resourceType":"GMSprite",
