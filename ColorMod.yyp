@@ -24,6 +24,7 @@
     {"id":{"name":"rMain","path":"rooms/rMain/rMain.yy",},},
     {"id":{"name":"ColorMod","path":"scripts/ColorMod/ColorMod.yy",},},
     {"id":{"name":"ColorModDestroy","path":"scripts/ColorModDestroy/ColorModDestroy.yy",},},
+    {"id":{"name":"ColorModFromSprite","path":"scripts/ColorModFromSprite/ColorModFromSprite.yy",},},
     {"id":{"name":"ColorModSpriteColumnToArray","path":"scripts/ColorModSpriteColumnToArray/ColorModSpriteColumnToArray.yy",},},
     {"id":{"name":"ColorModSpriteRowToArray","path":"scripts/ColorModSpriteRowToArray/ColorModSpriteRowToArray.yy",},},
     {"id":{"name":"__shdColorMod","path":"shaders/__shdColorMod/__shdColorMod.yy",},},

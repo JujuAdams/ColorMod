@@ -14,5 +14,6 @@
     {"name":"sTestHair","order":4,"path":"sprites/sTestHair/sTestHair.yy",},
     {"name":"sTestPaletteColumns","order":6,"path":"sprites/sTestPaletteColumns/sTestPaletteColumns.yy",},
     {"name":"sTestPaletteRows","order":5,"path":"sprites/sTestPaletteRows/sTestPaletteRows.yy",},
+    {"name":"ColorModFromSprite","order":1,"path":"scripts/ColorModFromSprite/ColorModFromSprite.yy",},
   ],
 }
