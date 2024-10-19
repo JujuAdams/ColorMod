@@ -159,41 +159,57 @@ function ColorMod(_targetColorArray, _maxPalettes = 30, _debugMode = false, _mod
             {
                 _modulo = _moduloHint;
             }
-            else
-            {
-                show_debug_message("ColorMod: Warning! Modulo hint " + string(_moduloHint) + " invalid");
-            }
         }
         
         if (_modulo == undefined)
         {
             //Do a brute force search instead
             
+            var _duplicateDict = {};
+            
             var _modulo = _colorCount-1;
             do
             {
                 var _success = true;
                 var _foundDict = {};
+                var _seenDict  = {};
                 ++_modulo;
                 
                 var _i = 0;
                 repeat(_colorCount)
                 {
-                    var _value = _targetColorArray[_i] mod _modulo;
-                    if (variable_struct_exists(_foundDict, _value))
-                    {
-                        _success = false;
-                        break;
-                    }
+                    var _color = _targetColorArray[_i];
                     
-                    _foundDict[$ _value] = true;
+                    if (variable_struct_exists(_seenDict, _color))
+                    {
+                        if (not variable_struct_exists(_duplicateDict, _color))
+                        {
+                            var _bgr = ((_color & 0x0000FF) << 16) | (_color & 0x00FF00) | ((_color & 0xFF0000) >> 16);
+                            show_debug_message($"ColorMod: Warning! Found duplicate color in default palette #{string_delete(string(ptr(_bgr)), 1, 10)}");
+                            
+                            _duplicateDict[$ _color] = true;
+                        }
+                    }
+                    else
+                    {
+                        var _value = _color mod _modulo;
+                        
+                        if (variable_struct_exists(_foundDict, _value))
+                        {
+                            _success = false;
+                            break;
+                        }
+                        
+                        _foundDict[$ _value] = true;
+                        _seenDict[$  _color] = true;
+                    }
                     
                     ++_i;
                 }
             }
             until(_success)
             
-            if (_moduloHint != undefined) show_debug_message("ColorMod: Using modulo " + string(_modulo) + " instead");
+            if (_moduloHint != undefined) show_debug_message($"ColorMod: Warning! Modulo hint {_moduloHint} invalid, using modulo {_modulo} instead");
         }
         
         _moduloLookup[$ _searchKey] = _modulo;
