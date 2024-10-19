@@ -1,9 +1,9 @@
 {
   "$GMScript":"v1",
-  "%Name":"ColorModDestroy",
+  "%Name":"ColorModFromSprite",
   "isCompatibility":false,
   "isDnD":false,
-  "name":"ColorModDestroy",
+  "name":"ColorModFromSprite",
   "parent":{
     "name":"ColorMod",
     "path":"folders/ColorMod.yy",

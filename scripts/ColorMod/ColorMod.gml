@@ -1,18 +1,41 @@
 // Feather disable all
 
-/// ColorMod(targetColorArray, [maxPalettes=30], [debugMode=false]) constructor
+/// `ColorMod(targetColorArray, [maxPalettes=30], [debugMode=false]) constructor`
 /// 
 /// Constructor for a ColorMod struct. This struct acts as an interface for customising and
 /// enabling palette swaps using the "color modulo" technique. A ColorMod struct has no public
-/// variables. Public methods that should be used are listed below.
+/// variables. A full list of public methods that should be used are listed below. Basic use is:
 /// 
-/// If "debugMode" is set to <true> then any colors in the drawn image that are not in the target
-/// color array will usually be highlighted in bright fuchsia. Drawing with debug mode turned on
-/// will significantly decrease performance so remember to turn it off before compiling your game
-/// for other people to play.
+/// Step 1: Create a ColorMod struct at the start of the game
+///     global.colorModForPlayer = ColorMod([#a084f1, #8966ea, #6759a4, #524280]);
 /// 
-/// ColorMod is not compatible with antialiased art or art drawn with texture filtering / bilinear
-/// interpolation switched on. ColorMod should only be used with pixel art.
+/// Step 2: Adds palettes to the ColorMod struct
+///     global.colorModForPlayer.PaletteAdd("green", [#82cc71, #68b656, #539f42, #479234]);
+///     global.colorModForPlayer.PaletteAdd("blue",  [#2aaaf3, #249ee3, #2992ce, #1f7db3]);
+/// 
+/// Step 3: In a Draw event, set the ColorMod shader, draw a sprite, then reset the shader
+///     global.colorModForPlayer.SetShader(paletteName);
+///     draw_sprite(sPlayer, 0, x, y);
+///     shader_reset();
+/// 
+/// 
+/// 
+/// If the `debugMode` parameter is set to `true` then any colors in the drawn image that are not
+/// in the default palette will usually be highlighted in bright fuchsia. Drawing with debug mode
+/// turned on will significantly decrease performance so remember to turn it off before compiling
+/// your game for other people to play.
+/// 
+/// The `moduloHint` parameter allows you to provide a pre-calculated modulo value. This skips the
+/// slow modulo calculation step when first creating the ColorMod struct. You should calculate a
+/// modulo value by running the game then copying that modulo value into your codebase for
+/// subsequent runs of the game. You will need to update the modulo hint if your default palette
+/// changes (but not alternate palettes).
+/// 
+/// N.B. This function is fairly slow and you should generally only call this function once when
+///      the game boots.
+/// 
+/// N.B. ColorMod is not compatible with antialiased art or art drawn with texture filtering /
+///      bilinear interpolation switched on. ColorMod should only be used with pixel art.
 /// 
 /// 
 /// 
@@ -64,6 +87,10 @@
 /// .GetColorCount()
 ///     Returns the number of target colors provided when creating the ColorMod struct.
 /// 
+/// .EnsureSurface()
+///     Ensures that the ColorMod struct has generated its internal palette surface. This can help
+///     with hitching when a ColorMod struct is first used.
+/// 
 /// .MarkDirty()
 ///     Marks the ColorMod struct palette surface as "dirty" which will trigger a redraw when
 ///     .SetShader() is next called.
@@ -76,45 +103,47 @@
 ///     coordinates. Useful for checking values on the palette surface are what you expect them
 ///     to be.
 /// 
+/// 
+/// 
 /// @param targetColorArray
 /// @param [maxPalettes=30]
 /// @param [debugMode=false]
+/// @param [moduloHint]
 
-show_debug_message("ColorMod: Welcome to ColorMod by Juju Adams! This is version 1.1.0, 2024-04-03");
+show_debug_message("ColorMod: Welcome to ColorMod by Juju Adams! This is version 1.2.0, 2024-10-19");
 
-function ColorMod(_targetColorArray, _maxPalettes = 30, _debugMode = false) constructor
+function ColorMod(_targetColorArray, _maxPalettes = 30, _debugMode = false, _moduloHint = undefined) constructor
 {
     static _moduloLookup = {};
     
-    __targetColorArray = __ArrayClone(_targetColorArray);
+    __targetColorArray = variable_clone(_targetColorArray);
     __maxPalettes      = _maxPalettes;
     __debugMode        = _debugMode;
     
     __colorCount = array_length(__targetColorArray);
     
     //Skip searching for a suitable modulo for this set of colors if we can
-    var _searchArray = __ArrayClone(_targetColorArray);
+    var _searchArray = variable_clone(_targetColorArray);
     array_sort(_searchArray, true);
     var _searchKey = json_stringify(_searchArray);
     var _modulo = _moduloLookup[$ _searchKey];
     
     if (_modulo == undefined)
     {
-        //Welp, didn't find a solution. Do a brute force search instead
-        
+        //Welp, didn't find a solution
         var _colorCount = __colorCount;
-        var _modulo = _colorCount;
         
-        do
+        if (_moduloHint != undefined)
         {
+            //If we have a hint, check that it works
+            
             var _success = true;
             var _foundDict = {};
-            ++_modulo;
             
             var _i = 0;
             repeat(_colorCount)
             {
-                var _value = _targetColorArray[_i] mod _modulo;
+                var _value = _targetColorArray[_i] mod _moduloHint;
                 if (variable_struct_exists(_foundDict, _value))
                 {
                     _success = false;
@@ -125,8 +154,63 @@ function ColorMod(_targetColorArray, _maxPalettes = 30, _debugMode = false) cons
                 
                 ++_i;
             }
+            
+            if (_success)
+            {
+                _modulo = _moduloHint;
+            }
         }
-        until(_success)
+        
+        if (_modulo == undefined)
+        {
+            //Do a brute force search instead
+            
+            var _duplicateDict = {};
+            
+            var _modulo = _colorCount-1;
+            do
+            {
+                var _success = true;
+                var _foundDict = {};
+                var _seenDict  = {};
+                ++_modulo;
+                
+                var _i = 0;
+                repeat(_colorCount)
+                {
+                    var _color = _targetColorArray[_i];
+                    
+                    if (variable_struct_exists(_seenDict, _color))
+                    {
+                        if (not variable_struct_exists(_duplicateDict, _color))
+                        {
+                            var _bgr = ((_color & 0x0000FF) << 16) | (_color & 0x00FF00) | ((_color & 0xFF0000) >> 16);
+                            show_debug_message($"ColorMod: Warning! Found duplicate color in default palette #{string_delete(string(ptr(_bgr)), 1, 10)}");
+                            
+                            _duplicateDict[$ _color] = true;
+                        }
+                    }
+                    else
+                    {
+                        var _value = _color mod _modulo;
+                        
+                        if (variable_struct_exists(_foundDict, _value))
+                        {
+                            _success = false;
+                            break;
+                        }
+                        
+                        _foundDict[$ _value] = true;
+                        _seenDict[$  _color] = true;
+                    }
+                    
+                    ++_i;
+                }
+            }
+            until(_success)
+            
+            if (_moduloHint != undefined) show_debug_message($"ColorMod: Warning! Modulo hint {_moduloHint} invalid, using modulo {_modulo} instead");
+        }
         
         _moduloLookup[$ _searchKey] = _modulo;
     }
@@ -150,15 +234,16 @@ function ColorMod(_targetColorArray, _maxPalettes = 30, _debugMode = false) cons
     
     
     
-    static PaletteAdd = function(_paletteName, _outputColorArray)
+    static PaletteAdd = function(_paletteName, _outputColorArray = undefined)
     {
-        //Duplicate the incoming array to avoid being able to edit the color array after adding it
-        _outputColorArray = __ArrayClone(_outputColorArray);
-        var _outputColorCount = array_length(_outputColorArray);
-        
-        if (_outputColorCount > __colorCount)
+        if (_outputColorArray == undefined)
         {
-            __Error("Color array length (", _outputColorCount, ") is too long, expecting ", __colorCount);
+            _outputColorArray = variable_clone(__targetColorArray);
+        }
+        
+        if (array_length(_outputColorArray) != __colorCount)
+        {
+            __Error("Color array length (", array_length(_outputColorArray), ") doesn't match target color count ", __colorCount);
             return self;
         }
         
@@ -173,12 +258,6 @@ function ColorMod(_targetColorArray, _maxPalettes = 30, _debugMode = false) cons
         {
             __Error("Cannot add palette \"", _paletteName, "\", run out of palette slots (max=", __maxPalettes, ")");
             return self;
-        }
-        
-        var _lengthDelta = __colorCount - array_length(_outputColorArray);
-        if (_lengthDelta > 0)
-        {
-            array_copy(_outputColorArray, _outputColorCount, __targetColorArray, __colorCount - _lengthDelta, _lengthDelta);
         }
         
         var _data = {
@@ -321,7 +400,7 @@ function ColorMod(_targetColorArray, _maxPalettes = 30, _debugMode = false) cons
             return;
         }
         
-        __EnsureSurface();
+        EnsureSurface();
         
         if (__debugMode)
         {
@@ -360,7 +439,7 @@ function ColorMod(_targetColorArray, _maxPalettes = 30, _debugMode = false) cons
     {
         if (__destroyed) return;
         
-        __EnsureSurface();
+        EnsureSurface();
         
         draw_surface_ext(__surface, _x, _y, _scale, _scale, 0, c_white, 1);
     }
@@ -373,7 +452,7 @@ function ColorMod(_targetColorArray, _maxPalettes = 30, _debugMode = false) cons
         static _u_fColumn  = shader_get_uniform(__shdColorModDebugOutput, "u_fColumn");
         static _u_vTexel   = shader_get_uniform(__shdColorModDebugOutput, "u_vTexel");
         
-        __EnsureSurface();
+        EnsureSurface();
         
         shader_set(__shdColorModDebugOutput);
         shader_set_uniform_f(_u_fRow, __debugMode? (_colorIndex + 1) : _colorIndex);
@@ -385,7 +464,7 @@ function ColorMod(_targetColorArray, _maxPalettes = 30, _debugMode = false) cons
         shader_reset();
     }
     
-    static __EnsureSurface = function()
+    static EnsureSurface = function()
     {
         static _identityMatrix = matrix_build_identity();
         
@@ -466,13 +545,5 @@ function ColorMod(_targetColorArray, _maxPalettes = 30, _debugMode = false) cons
         }
         
         show_error(_string + "\n ", true);
-    }
-    
-    static __ArrayClone = function(_array)
-    {
-        var _length = array_length(_array);
-        var _newArray = array_create(_length);
-        array_copy(_newArray, 0, _array, 0, _length);
-        return _newArray;
     }
 }

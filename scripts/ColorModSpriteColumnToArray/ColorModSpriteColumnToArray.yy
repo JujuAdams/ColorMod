@@ -1,9 +1,9 @@
 {
   "$GMScript":"v1",
-  "%Name":"ColorModDestroy",
+  "%Name":"ColorModSpriteColumnToArray",
   "isCompatibility":false,
   "isDnD":false,
-  "name":"ColorModDestroy",
+  "name":"ColorModSpriteColumnToArray",
   "parent":{
     "name":"ColorMod",
     "path":"folders/ColorMod.yy",
