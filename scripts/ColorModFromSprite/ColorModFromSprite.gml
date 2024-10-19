@@ -30,6 +30,12 @@
 /// turned on will significantly decrease performance so remember to turn it off before compiling
 /// your game for other people to play.
 /// 
+/// The `moduloHint` parameter allows you to provide a pre-calculated modulo value. This skips the
+/// slow modulo calculation step when first creating the ColorMod struct. You should calculate a
+/// modulo value by running the game then copying that modulo value into your codebase for
+/// subsequent runs of the game. You will need to update the modulo hint if your default palette
+/// changes (but not alternate palettes).
+/// 
 /// N.B. This function is fairly slow and you should generally only call this function once when
 ///      the game boots.
 /// 
@@ -42,8 +48,9 @@
 /// @param image
 /// @param useRows
 /// @param [debugMode=false]
+/// @param [moduloHint]
 
-function ColorModFromSprite(_sprite, _image, _useRows, _debugMode = false)
+function ColorModFromSprite(_sprite, _image, _useRows, _debugMode = false, _moduloHint = undefined)
 {
     var _width  = sprite_get_width(_sprite);
     var _height = sprite_get_height(_sprite);
@@ -51,7 +58,7 @@ function ColorModFromSprite(_sprite, _image, _useRows, _debugMode = false)
     if (_useRows)
     {
         var _sourceArray = ColorModSpriteRowToArray(_sprite, _image, 0);
-        var _colorMod = new ColorMod(_sourceArray, _height, _debugMode);
+        var _colorMod = new ColorMod(_sourceArray, _height, _debugMode, _moduloHint);
         
         var _y = 0;
         repeat(_height)
@@ -63,7 +70,7 @@ function ColorModFromSprite(_sprite, _image, _useRows, _debugMode = false)
     else
     {
         var _sourceArray = ColorModSpriteColumnToArray(_sprite, _image, 0);
-        var _colorMod = new ColorMod(_sourceArray, _width, _debugMode);
+        var _colorMod = new ColorMod(_sourceArray, _width, _debugMode, _moduloHint);
         
         var _x = 0;
         repeat(_width)
@@ -72,6 +79,8 @@ function ColorModFromSprite(_sprite, _image, _useRows, _debugMode = false)
             ++_x;
         }
     }
+    
+    _colorMod.EnsureSurface();
     
     return _colorMod;
 }
