@@ -1,5 +1,8 @@
 // Feather disable all
 
+/// Helper function to convert a row of pixels in a sprite into an array of 24-bit RGB colour
+/// values.
+/// 
 /// @param sprite
 /// @param image
 /// @param y

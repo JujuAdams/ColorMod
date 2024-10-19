@@ -1,18 +1,35 @@
 // Feather disable all
 
-/// ColorMod(targetColorArray, [maxPalettes=30], [debugMode=false]) constructor
+/// `ColorMod(targetColorArray, [maxPalettes=30], [debugMode=false]) constructor`
 /// 
 /// Constructor for a ColorMod struct. This struct acts as an interface for customising and
 /// enabling palette swaps using the "color modulo" technique. A ColorMod struct has no public
-/// variables. Public methods that should be used are listed below.
+/// variables. A full list of public methods that should be used are listed below. Basic use is:
 /// 
-/// If "debugMode" is set to <true> then any colors in the drawn image that are not in the target
-/// color array will usually be highlighted in bright fuchsia. Drawing with debug mode turned on
-/// will significantly decrease performance so remember to turn it off before compiling your game
-/// for other people to play.
+/// Step 1: Create a ColorMod struct at the start of the game
+///     global.colorModForPlayer = ColorMod([#a084f1, #8966ea, #6759a4, #524280]);
 /// 
-/// ColorMod is not compatible with antialiased art or art drawn with texture filtering / bilinear
-/// interpolation switched on. ColorMod should only be used with pixel art.
+/// Step 2: Adds palettes to the ColorMod struct
+///     global.colorModForPlayer.PaletteAdd("green", [#82cc71, #68b656, #539f42, #479234]);
+///     global.colorModForPlayer.PaletteAdd("blue",  [#2aaaf3, #249ee3, #2992ce, #1f7db3]);
+/// 
+/// Step 3: In a Draw event, set the ColorMod shader, draw a sprite, then reset the shader
+///     global.colorModForPlayer.SetShader(paletteName);
+///     draw_sprite(sPlayer, 0, x, y);
+///     shader_reset();
+/// 
+/// 
+/// 
+/// If the `debugMode` parameter is set to `true` then any colors in the drawn image that are not
+/// in the default palette will usually be highlighted in bright fuchsia. Drawing with debug mode
+/// turned on will significantly decrease performance so remember to turn it off before compiling
+/// your game for other people to play
+/// 
+/// N.B. This function is fairly slow and you should generally only call this function once when
+///      the game boots.
+/// 
+/// N.B. ColorMod is not compatible with antialiased art or art drawn with texture filtering /
+///      bilinear interpolation switched on. ColorMod should only be used with pixel art.
 /// 
 /// 
 /// 
@@ -75,6 +92,8 @@
 ///     Draws the color value for the given palette and color index, stretched out at the given
 ///     coordinates. Useful for checking values on the palette surface are what you expect them
 ///     to be.
+/// 
+/// 
 /// 
 /// @param targetColorArray
 /// @param [maxPalettes=30]

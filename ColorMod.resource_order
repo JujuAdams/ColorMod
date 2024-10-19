@@ -1,8 +1,8 @@
 {
   "FolderOrderSettings":[],
   "ResourceOrderSettings":[
-    {"name":"oTestArrays","order":1,"path":"objects/oTestArrays/oTestArrays.yy",},
-    {"name":"oTestSprite","order":2,"path":"objects/oTestSprite/oTestSprite.yy",},
+    {"name":"oTestArrays","order":2,"path":"objects/oTestArrays/oTestArrays.yy",},
+    {"name":"oTestSprite","order":1,"path":"objects/oTestSprite/oTestSprite.yy",},
     {"name":"rMain","order":3,"path":"rooms/rMain/rMain.yy",},
     {"name":"ColorModDestroy","order":2,"path":"scripts/ColorModDestroy/ColorModDestroy.yy",},
     {"name":"ColorModFromSprite","order":1,"path":"scripts/ColorModFromSprite/ColorModFromSprite.yy",},
