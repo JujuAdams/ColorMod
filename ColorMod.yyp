@@ -20,7 +20,8 @@
   },
   "name":"ColorMod",
   "resources":[
-    {"id":{"name":"oTest","path":"objects/oTest/oTest.yy",},},
+    {"id":{"name":"oTestArrays","path":"objects/oTestArrays/oTestArrays.yy",},},
+    {"id":{"name":"oTestSprite","path":"objects/oTestSprite/oTestSprite.yy",},},
     {"id":{"name":"rMain","path":"rooms/rMain/rMain.yy",},},
     {"id":{"name":"ColorMod","path":"scripts/ColorMod/ColorMod.yy",},},
     {"id":{"name":"ColorModDestroy","path":"scripts/ColorModDestroy/ColorModDestroy.yy",},},
