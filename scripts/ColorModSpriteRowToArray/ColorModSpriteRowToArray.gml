@@ -16,7 +16,7 @@ function ColorModSpriteRowToArray(_sprite, _image, _y)
     
     var _surface = surface_create(_width, _height);
     surface_set_target(_surface);
-    draw_sprite(_sprite, _image, 0, 0);
+    draw_sprite(_sprite, _image, sprite_get_xoffset(_sprite), sprite_get_yoffset(_sprite));
     surface_reset_target();
     
     var _buffer = buffer_create(4*_width*_height, buffer_fixed, 1);
