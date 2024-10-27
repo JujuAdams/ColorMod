@@ -56,6 +56,9 @@
 ///     copied from the target colors used to create to fill in the gap. If a palette with the
 ///     given name already exists, this function will throw an error.
 /// 
+/// .PaletteGetIndex(paletteIndex)
+///     
+/// 
 /// .PaletteOverwrite(paletteName, colorArray, destOffset, [srcOffset], [length])
 ///     Overwrites a portion of an existing palette using part of a source color array. If a
 ///     palette with the provided name does not exist, this function with throw an error.
@@ -277,6 +280,18 @@ function ColorMod(_targetColorArray, _maxPalettes = 30, _debugMode = false, _mod
         return self;
     }
     
+    static PaletteGetIndex = function(_paletteName)
+    {
+        var _data = __outputPaletteDict[$ _paletteName];
+        if (_data == undefined)
+        {
+            __Error("Palette \"", _paletteName, "\" not found");
+            return;
+        }
+        
+        return _data.__index;
+    }
+    
     static PaletteEnsure = function(_paletteName, _outputColorArray = undefined)
     {
         if (variable_struct_exists(__outputPaletteDict, _paletteName))
@@ -467,6 +482,40 @@ function ColorMod(_targetColorArray, _maxPalettes = 30, _debugMode = false, _mod
             texture_set_stage(_u_sPalette, __texture);
             shader_set_uniform_f(_u_vModulo, 1, 0x100 mod __modulo, 0x10000 mod __modulo, __modulo);
             shader_set_uniform_f(_u_vColumnData, _dataA.__index, _dataB.__index, clamp(_blendFactor, 0, 1));
+            shader_set_uniform_f(_u_vTexel, __texelWidth, __texelHeight);
+        }
+    }
+    
+    static SetShaderBlendIndex = function(_index)
+    {
+        if (__destroyed) return;
+        
+        static _u_sPalette    = shader_get_sampler_index(__shdColorModBlend, "u_sPalette");
+        static _u_vModulo     = shader_get_uniform(__shdColorModBlend, "u_vModulo");
+        static _u_vColumnData = shader_get_uniform(__shdColorModBlend, "u_vColumnData");
+        static _u_vTexel      = shader_get_uniform(__shdColorModBlend, "u_vTexel");
+        
+        static _u_sPaletteDebug    = shader_get_sampler_index(__shdColorModBlendDebug, "u_sPalette");
+        static _u_vModuloDebug     = shader_get_uniform(__shdColorModBlendDebug, "u_vModulo");
+        static _u_vColumnDataDebug = shader_get_uniform(__shdColorModBlendDebug, "u_vColumnData");
+        static _u_vTexelDebug      = shader_get_uniform(__shdColorModBlendDebug, "u_vTexel");
+        
+        EnsureSurface();
+        
+        if (__debugMode)
+        {
+            shader_set(__shdColorModBlendDebug);
+            texture_set_stage(_u_sPaletteDebug, __texture);
+            shader_set_uniform_f(_u_vModuloDebug, 1, 0x100 mod __modulo, 0x10000 mod __modulo, __modulo);
+            shader_set_uniform_f(_u_vColumnDataDebug, floor(_index) + 1, ceil(_index) + 1, frac(_index));
+            shader_set_uniform_f(_u_vTexelDebug, __texelWidth, __texelHeight);
+        }
+        else
+        {
+            shader_set(__shdColorModBlend);
+            texture_set_stage(_u_sPalette, __texture);
+            shader_set_uniform_f(_u_vModulo, 1, 0x100 mod __modulo, 0x10000 mod __modulo, __modulo);
+            shader_set_uniform_f(_u_vColumnData, floor(_index), ceil(_index), frac(_index));
             shader_set_uniform_f(_u_vTexel, __texelWidth, __texelHeight);
         }
     }
