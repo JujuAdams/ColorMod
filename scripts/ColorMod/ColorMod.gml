@@ -49,15 +49,21 @@
 ///     Sets up the palette swap shader for the given palette.
 /// 
 /// .SetShaderBlend(paletteNameA, paletteNameB, blendFactor)
-///     Sets up the palette swap shader to blend between two palettes.
+///     Sets up the palette swap shader to blend between two palettes. `blendFactor` should be a
+///     number between 0 and 1.
+/// 
+/// .SetShaderIndex(paletteIndex)
+///     Sets up the palette swap shader for the given palette index. You can blend between two
+///     palettes by using a fractional value e.g `1.5` is a 50% blend palette index 1 and 2. A
+///     palette's index can be found by calling `.PaletteGetIndex()`.
 /// 
 /// .PaletteAdd(paletteName, colorArray)
 ///     Adds a new palette to the ColorMod struct. If the color array is too short, colors will be
 ///     copied from the target colors used to create to fill in the gap. If a palette with the
 ///     given name already exists, this function will throw an error.
 /// 
-/// .PaletteGetIndex(paletteIndex)
-///     
+/// .PaletteGetIndex(paletteName)
+///     Returns the index for the named palette.
 /// 
 /// .PaletteOverwrite(paletteName, colorArray, destOffset, [srcOffset], [length])
 ///     Overwrites a portion of an existing palette using part of a source color array. If a
