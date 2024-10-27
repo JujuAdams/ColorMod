@@ -30,6 +30,8 @@
     {"id":{"name":"ColorModSpriteColumnToArray","path":"scripts/ColorModSpriteColumnToArray/ColorModSpriteColumnToArray.yy",},},
     {"id":{"name":"ColorModSpriteRowToArray","path":"scripts/ColorModSpriteRowToArray/ColorModSpriteRowToArray.yy",},},
     {"id":{"name":"__shdColorMod","path":"shaders/__shdColorMod/__shdColorMod.yy",},},
+    {"id":{"name":"__shdColorModBlend","path":"shaders/__shdColorModBlend/__shdColorModBlend.yy",},},
+    {"id":{"name":"__shdColorModBlendDebug","path":"shaders/__shdColorModBlendDebug/__shdColorModBlendDebug.yy",},},
     {"id":{"name":"__shdColorModDebug","path":"shaders/__shdColorModDebug/__shdColorModDebug.yy",},},
     {"id":{"name":"__shdColorModDebugOutput","path":"shaders/__shdColorModDebugOutput/__shdColorModDebugOutput.yy",},},
     {"id":{"name":"__sColorModPixel","path":"sprites/__sColorModPixel/__sColorModPixel.yy",},},

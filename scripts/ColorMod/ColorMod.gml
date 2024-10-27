@@ -48,6 +48,9 @@
 /// .SetShader(paletteName)
 ///     Sets up the palette swap shader for the given palette.
 /// 
+/// .SetShaderBlend(paletteNameA, paletteNameB, blendFactor)
+///     Sets up the palette swap shader to blend between two palettes.
+/// 
 /// .PaletteAdd(paletteName, colorArray)
 ///     Adds a new palette to the ColorMod struct. If the color array is too short, colors will be
 ///     copied from the target colors used to create to fill in the gap. If a palette with the
@@ -416,6 +419,54 @@ function ColorMod(_targetColorArray, _maxPalettes = 30, _debugMode = false, _mod
             texture_set_stage(_u_sPalette, __texture);
             shader_set_uniform_f(_u_vModulo, 1, 0x100 mod __modulo, 0x10000 mod __modulo, __modulo);
             shader_set_uniform_f(_u_fColumn, _data.__index);
+            shader_set_uniform_f(_u_vTexel, __texelWidth, __texelHeight);
+        }
+    }
+    
+    static SetShaderBlend = function(_paletteNameA, _paletteNameB, _blendFactor)
+    {
+        if (__destroyed) return;
+        
+        static _u_sPalette    = shader_get_sampler_index(__shdColorModBlend, "u_sPalette");
+        static _u_vModulo     = shader_get_uniform(__shdColorModBlend, "u_vModulo");
+        static _u_vColumnData = shader_get_uniform(__shdColorModBlend, "u_vColumnData");
+        static _u_vTexel      = shader_get_uniform(__shdColorModBlend, "u_vTexel");
+        
+        static _u_sPaletteDebug    = shader_get_sampler_index(__shdColorModBlendDebug, "u_sPalette");
+        static _u_vModuloDebug     = shader_get_uniform(__shdColorModBlendDebug, "u_vModulo");
+        static _u_vColumnDataDebug = shader_get_uniform(__shdColorModBlendDebug, "u_vColumnData");
+        static _u_vTexelDebug      = shader_get_uniform(__shdColorModBlendDebug, "u_vTexel");
+        
+        var _dataA = __outputPaletteDict[$ _paletteNameA];
+        if (_dataA == undefined)
+        {
+            __Error("Palette \"", _paletteName, "\" not found");
+            return;
+        }
+        
+        var _dataB = __outputPaletteDict[$ _paletteNameB];
+        if (_dataB == undefined)
+        {
+            __Error("Palette \"", _paletteName, "\" not found");
+            return;
+        }
+        
+        EnsureSurface();
+        
+        if (__debugMode)
+        {
+            shader_set(__shdColorModBlendDebug);
+            texture_set_stage(_u_sPaletteDebug, __texture);
+            shader_set_uniform_f(_u_vModuloDebug, 1, 0x100 mod __modulo, 0x10000 mod __modulo, __modulo);
+            shader_set_uniform_f(_u_vColumnDataDebug, _dataA.__index + 1, _dataB.__index + 1, clamp(_blendFactor, 0, 1));
+            shader_set_uniform_f(_u_vTexelDebug, __texelWidth, __texelHeight);
+        }
+        else
+        {
+            shader_set(__shdColorModBlend);
+            texture_set_stage(_u_sPalette, __texture);
+            shader_set_uniform_f(_u_vModulo, 1, 0x100 mod __modulo, 0x10000 mod __modulo, __modulo);
+            shader_set_uniform_f(_u_vColumnData, _dataA.__index, _dataB.__index, clamp(_blendFactor, 0, 1));
             shader_set_uniform_f(_u_vTexel, __texelWidth, __texelHeight);
         }
     }
